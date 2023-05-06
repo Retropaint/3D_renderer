@@ -217,116 +217,16 @@ void renderTriangle(Triangle tri, Color color) {
         return;
     }
 
-    Vector3f points[4];
-    int pLen = nearClip(tri.verts, points);
-
-    Triangle newTri = tri;
-    newTri.verts[0] = points[0];
-    newTri.verts[1] = points[1];
-    newTri.verts[2] = points[2];
-
-    if(pLen == -1 && backCulling) {
-        fillTriangle(newTri, Color::White, false, 2, true);
-    } else {
-        fillTriangle(newTri, Color::White, false, 2, false);
+    if(isFullyInView(tri.verts)) {
+        fillTriangle(tri, Color::White, false, 2, true);
+        return;
     }
 
-    printf("%d\n", pLen);
+    Triangle tris[10];
+    int tLen;
+    clipTriangle(tri, tris, &tLen);
 
-    if(pLen >= 4) {
-        newTri.verts[0] = points[1];
-        newTri.verts[1] = points[2];
-        newTri.verts[2] = points[3];
-        fillTriangle(newTri, Color::White, false, 2, false);
+    for(int i = 0; i < tLen; i++) {
+        fillTriangle(tris[i], Color::White, false, 2, false);
     }
 }
-
-// unused
-// meant to be used with triangleClipper's allIntPoints()
-
-/*
-float clockDirection(Vector3f p1, Vector3f p2, Vector3f p3) {
-    return  
-        (p2.x - p1.x) * (p3.y - p1.y) - 
-        (p3.x - p1.x) * (p2.y - p1.y);
-}
-
-void renderClippedTriangles(Vector3f *points, int pLen, Triangle tri, Color color) {
-    int cutLen = 0;
-
-    Color colors[] = {
-        Color(255, 0, 0),
-        Color(0, 255, 0),
-        Color(0, 0, 255),
-        Color(255, 255, 0),
-        Color(0, 255, 255),
-        Color(255, 255, 255)
-    };
-
-    int triLen = 0;
-    
-    while(cutLen < pLen - 3) {
-        Vector3f mainPoint = points[cutLen];
-        Vector3f neighbour1 = Vector3f(NAN, NAN, NAN);
-        Vector3f neighbour2;
-
-        // check if intersection exists in current segment
-        for(int i = cutLen+1; i < pLen; i++) {
-            Vector3f neighbourPoint = points[i];
-            bool isIntersecting = false;
-            
-            for(int j = cutLen+1; j < pLen; j++) {
-                Vector3f otherPoint1 = points[j];
-                if(otherPoint1 == neighbourPoint || otherPoint1 == neighbour1) {
-                    continue;
-                }
-                
-                for(int k = cutLen+1; k < pLen; k++) {
-                    Vector3f otherPoint2 = points[k];
-                    if(otherPoint2 == neighbourPoint || otherPoint2 == otherPoint1) {
-                        continue;
-                    }
-
-                    // do cross product clockwise and counter-clockwise checks
-                    if(
-                        clockDirection(mainPoint, neighbourPoint, otherPoint1) < 0 && clockDirection(mainPoint, neighbourPoint, otherPoint2) > 0 ||
-                        clockDirection(mainPoint, neighbourPoint, otherPoint1) > 0 && clockDirection(mainPoint, neighbourPoint, otherPoint2) < 0
-                    ) {
-                        isIntersecting = true;
-                        break;
-                    } 
-                }
-
-                if(isIntersecting) {
-                    break;
-                }
-            }
-
-            if(!isIntersecting) {
-                if(isnan(neighbour1.x)) {
-                    neighbour1 = neighbourPoint;
-                } else {
-                    neighbour2 = neighbourPoint;
-                    break;
-                }
-            }
-        }
-
-        Triangle newTri = tri;
-        newTri.verts[0] = mainPoint;
-        newTri.verts[1] = neighbour1;
-        newTri.verts[2] = neighbour2;
-        fillTriangle(newTri, colors[triLen], false, 2);
-        triLen++;
-
-        cutLen++;
-    }
-
-    // connect the 3 remaining points
-    Triangle newTri = tri;
-    newTri.verts[0] = points[pLen-1];
-    newTri.verts[1] = points[pLen-2];
-    newTri.verts[2] = points[pLen-3];
-    fillTriangle(newTri, colors[triLen], false, 2);
-}
-*/
