@@ -1,0 +1,24 @@
+{
+    "C_Cpp.errorSquiggles": "disabled",
+    "files.associations": {
+        "*.in": "cpp",
+        "__config": "cpp",
+        "chrono": "cpp",
+        "cmath": "cpp",
+        "locale": "cpp",
+        "complex": "cpp",
+        "istream": "cpp",
+        "memory": "cpp",
+        "tuple": "cpp",
+        "ostream": "cpp",
+        "*.tcc": "cpp",
+        "iostream": "cpp",
+        "random": "cpp",
+        "limits": "cpp",
+        "strstream": "cpp",
+        "iosfwd": "cpp",
+        "fstream": "cpp",
+        "functional": "cpp"
+    },
+    "cmake.configureOnOpen": false
+}
