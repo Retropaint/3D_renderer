@@ -4,6 +4,7 @@
 #include "directives.hpp"
 #include "externs.hpp"
 #include "objLoader/objLoader.hpp"
+#include "debugger/debugger.hpp"
 
 Vector2i prevMouse;
 
@@ -88,6 +89,7 @@ int main(int argc, char** argv)
                 depthZ[x][y] = INFINITY;
             }
         }
+        dbg::drawnTris = 0;
 
         if(Keyboard::isKeyPressed(Keyboard::Right)) {
             camera.angle.y -= 0.05;
@@ -102,14 +104,14 @@ int main(int argc, char** argv)
 
         float offset = M_PI/2;
         if(Keyboard::isKeyPressed(Keyboard::W)) {
-            playerMove(&camera.pos, camera.angle.y + offset, 2);
+            playerMove(&camera.pos, camera.angle.y + offset, 5);
         } else if(Keyboard::isKeyPressed(Keyboard::S)) {
-            playerMove(&camera.pos, camera.angle.y - M_PI + offset, 2);
+            playerMove(&camera.pos, camera.angle.y - M_PI + offset, 5);
         }
         if(Keyboard::isKeyPressed(Keyboard::A)) {
-            playerMove(&camera.pos, camera.angle.y + M_PI/2 + offset, 2);
+            playerMove(&camera.pos, camera.angle.y + M_PI/2 + offset, 5);
         } else if(Keyboard::isKeyPressed(Keyboard::D)) {
-            playerMove(&camera.pos, camera.angle.y - M_PI/2 + offset, 2);
+            playerMove(&camera.pos, camera.angle.y - M_PI/2 + offset, 5);
         }
 
         if(Keyboard::isKeyPressed(Keyboard::Escape)) {
@@ -124,10 +126,10 @@ int main(int argc, char** argv)
         }
 
         if(Keyboard::isKeyPressed(Keyboard::Num1)) {
-            backCulling = true;
+            dbg::triClipColorCode = true;
         }
         if(Keyboard::isKeyPressed(Keyboard::Num2)) {
-            backCulling = false;
+            dbg::triClipColorCode = false;
         }
 
         window.clear();
@@ -137,10 +139,10 @@ int main(int argc, char** argv)
             //renderTriangle(tri1, Color::Magenta);
         } else {
             for(int i = 0; i < obj.triLen; i++) {
-                renderTriangle(obj.tris[i], Color::Green);
+                renderTriangle(obj.tris[i], Color::White);
             }
             for(int i = 0; i < obj2.triLen; i++) {
-                renderTriangle(obj2.tris[i], Color::Green);
+                renderTriangle(obj2.tris[i], Color::White);
             }
         }
 
@@ -195,8 +197,7 @@ int main(int argc, char** argv)
         spr.setTexture(tex);
         window.draw(spr);
 
-        //printf("%d\n", tris);
-        tris = 0;
+        printf("%d\n", dbg::drawnTris);
 
         window.display();
     }

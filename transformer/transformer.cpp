@@ -8,7 +8,7 @@ Vector3f worldToScreenPos(Vector3f worldPoint, Camera camera) {
     Vector3f screenPoint = Vector3f(screenWidth/2, screenHeight/2, worldPoint.z);
 
     if(worldPoint.z == 0) {
-        worldPoint.z = 1;
+        worldPoint.z = 0.01;
     }
 
     //...these pixels will then be offset by their perspective projection

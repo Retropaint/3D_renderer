@@ -12,7 +12,4 @@ using namespace sf;
     extern RenderWindow window;
     extern Camera camera;
     extern RectangleShape pixel;
-
-    inline int tris = 0;
-    inline bool backCulling = true;
 #endif

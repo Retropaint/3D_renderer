@@ -59,9 +59,9 @@ void drawHorizLine(float start, float end, float y, Color color, Vector3f *triVe
             triVerts[2].z * bary.tri1;
 
         Color shading(
-            min((float)color.r, max(20.0f, 255 - pixel.z)),
-            min((float)color.g, max(20.0f, 255 - pixel.z)),
-            min((float)color.b, max(20.0f, 255 - pixel.z))
+            min((float)color.r, max(60.0f, 255 - pixel.z)),
+            min((float)color.g, max(60.0f, 255 - pixel.z)),
+            min((float)color.b, max(60.0f, 255 - pixel.z))
         );
         
         drawPixel(pixel, camera, shading);
@@ -173,8 +173,6 @@ void fillTriangle(Triangle tri, Color color, bool baryShading, int modType, bool
         return;
     }
 
-    tris++;
-
     // separate sorted tri verts (by descending y), so the original order can be sent and make bary coords easier to do
     Vector3f sortedVerts[3];
     sortedVerts[0] = Vector3f(tri.verts[0].x, tri.verts[0].y, tri.verts[0].z);
@@ -200,6 +198,8 @@ void fillTriangle(Triangle tri, Color color, bool baryShading, int modType, bool
 
     fillBottomFlatTri(sortedVerts, midPoint, color, tri);
     fillTopFlatTri(sortedVerts, midPoint, color, tri);
+
+    dbg::drawnTris++;
 }
 
 void renderTriangle(Triangle tri, Color color) {
@@ -218,15 +218,30 @@ void renderTriangle(Triangle tri, Color color) {
     }
 
     if(isFullyInView(tri.verts)) {
-        fillTriangle(tri, Color::White, false, 2, true);
+        fillTriangle(tri, color, false, 2, true);
         return;
     }
 
     Triangle tris[10];
     int tLen;
-    clipTriangle(tri, tris, &tLen);
+    int toffset = -1;
+    clipTriangle(tri, tris, &tLen, &toffset);
+
+    Color colors[10] = {
+        Color(255, 0, 0),
+        Color(0, 255, 0),
+        Color(0, 0, 255),
+        Color(255, 255, 0),
+        Color(0, 255, 255),
+        Color(255, 0, 255),
+        Color(255, 255, 255)
+    };
 
     for(int i = 0; i < tLen; i++) {
-        fillTriangle(tris[i], Color::White, false, 2, false);
+        if(dbg::triClipColorCode) {
+            fillTriangle(tris[i], colors[i], false, 2, false);
+        } else {
+            fillTriangle(tris[i], color, false, 2, false);
+        }
     }
 }
