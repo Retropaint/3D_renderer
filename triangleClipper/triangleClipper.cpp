@@ -103,7 +103,7 @@ int clip(Vector3f* verts, Vector3f* points, Vector3f plane) {
     return pLen;
 }
 
-void clipTriangle(Triangle mainTri, Triangle *tris, int *tLen, int *offset) {
+void clipTriangle(Triangle mainTri, Triangle *tris, int *tLen) {
     tris[0] = mainTri;
     *tLen = 1;
     
@@ -113,7 +113,7 @@ void clipTriangle(Triangle mainTri, Triangle *tris, int *tLen, int *offset) {
 
     for(int p = 0; p < planeLen; p++) {
         int currLen = *tLen;
-        
+
         for(int t = 0; t < currLen; t++) {
             Triangle tri = tris[t];
 

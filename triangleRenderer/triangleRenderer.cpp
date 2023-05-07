@@ -224,8 +224,7 @@ void renderTriangle(Triangle tri, Color color) {
 
     Triangle tris[10];
     int tLen;
-    int toffset = -1;
-    clipTriangle(tri, tris, &tLen, &toffset);
+    clipTriangle(tri, tris, &tLen);
 
     Color colors[10] = {
         Color(255, 0, 0),
