@@ -4,13 +4,14 @@
 #include "cameraPlanes/cameraPlanes.hpp"
 #include "debugger/debugger.hpp"
 #include "externs.hpp"
+#include "directives.hpp"
 
 using namespace sf;
 using namespace std;
 
 float near = 5;
 float far = 1000;
-float cullTolerance = 50;
+
 
 float planeNormalDist(Vector3f point, Vector3f planeNormal, float offset) {
     if(planeNormal == planeNear) {
