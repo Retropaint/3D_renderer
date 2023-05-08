@@ -107,15 +107,17 @@ int clip(Vector3f* verts, Vector3f* points, Vector3f planeNormal) {
 void clipTriangle(Triangle mainTri, Triangle *tris, int *tLen) {
     tris[0] = mainTri;
     *tLen = 1;
-    
+
     int planeLen = 6;
     Vector3f planes[planeLen] = { planeNear, planeFar, planeLeft, planeRight, planeTop, planeBottom };
     float offsets[planeLen] = { near, far, 0, 0, 0, 0 };
 
     for(int p = 0; p < planeLen; p++) {
-        int currLen = *tLen;
 
-        for(int t = 0; t < currLen; t++) {
+        // ignore new tris created from the current plane-clipping wave
+        int currentLen = *tLen;
+
+        for(int t = 0; t < currentLen; t++) {
             Triangle tri = tris[t];
 
             Vector3f points[4];
@@ -138,7 +140,6 @@ void clipTriangle(Triangle mainTri, Triangle *tris, int *tLen) {
                 newTri2.verts[2] = points[3];
                 tris[*tLen] = newTri2;
                 (*tLen)++;
-
             }
         }
     }
