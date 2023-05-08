@@ -59,9 +59,9 @@ void drawHorizLine(float start, float end, float y, Color color, Vector3f *triVe
             triVerts[2].z * bary.tri1;
 
         Color shading(
-            min((float)color.r, max(60.0f, 255 - pixel.z)),
-            min((float)color.g, max(60.0f, 255 - pixel.z)),
-            min((float)color.b, max(60.0f, 255 - pixel.z))
+            min((float)color.r, max(20.0f, 255 - pixel.z/4)),
+            min((float)color.g, max(20.0f, 255 - pixel.z/4)),
+            min((float)color.b, max(20.0f, 255 - pixel.z/4))
         );
         
         drawPixel(pixel, camera, shading);
