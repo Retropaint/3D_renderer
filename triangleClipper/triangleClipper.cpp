@@ -1,7 +1,7 @@
 #include <cmath>
 #include <iostream>
 #include <iomanip>
-#include "cameraPlanes.hpp"
+#include "cameraPlanes/cameraPlanes.hpp"
 #include "debugger/debugger.hpp"
 #include "externs.hpp"
 

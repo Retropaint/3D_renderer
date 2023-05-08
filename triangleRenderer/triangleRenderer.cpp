@@ -1,7 +1,7 @@
 #include <math.h>
 #include "triangleClipper/triangleClipper.hpp"
 #include "transformer/transformer.hpp"
-#include "cameraPlanes.hpp"
+#include "cameraPlanes/cameraPlanes.hpp"
 #include "debugger/debugger.hpp"
 #include "directives.hpp"
 #include "externs.hpp"

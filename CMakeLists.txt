@@ -11,6 +11,7 @@ add_subdirectory(debugger)
 add_subdirectory(transformer)
 add_subdirectory(triangleClipper)
 add_subdirectory(objLoader)
+add_subdirectory(cameraPlanes)
 
 # libs
 list(APPEND LIBS sfml-graphics)
@@ -21,6 +22,7 @@ list(APPEND LIBS transformer)
 list(APPEND LIBS triangleClipper)
 list(APPEND LIBS debugger)
 list(APPEND LIBS objLoader)
+list(APPEND LIBS cameraPlanes)
 target_link_libraries(test ${LIBS})
 
 # includes

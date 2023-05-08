@@ -5,6 +5,7 @@
 #include "externs.hpp"
 #include "objLoader/objLoader.hpp"
 #include "debugger/debugger.hpp"
+#include "cameraPlanes/cameraPlanes.hpp"
 
 Vector2i prevMouse;
 
@@ -16,10 +17,6 @@ Vector3f tri2Verts[3] = {
 
 struct Triangle tri;
 struct Triangle tri1;
-
-Triangle drawTri;
-int drawTriLen;
-bool pressed = false;
 
 RenderWindow window(VideoMode(screenWidth, screenHeight), "Triangle Clipping", Style::Default);
 Camera camera;
@@ -41,8 +38,7 @@ void playerMove(Vector3f *pos, float angle, float speed) {
     pos->z += sin(angle) * speed;
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     if(argc == 3) {
         readObjFile(argv[1], argv[2], &obj);
     } else if(argc == 2) {
@@ -59,7 +55,8 @@ int main(int argc, char** argv)
     // init camera
     camera.pos = Vector3f(0, 0, 0);
     camera.angle = Vector3f(0, 0, 0);
-    camera.near = 300;
+
+    int fov = 90;
 
     initTriangle(&tri, tri2Verts);
     tri.pos = Vector3f(0, 25, 0);
@@ -132,6 +129,20 @@ int main(int argc, char** argv)
             dbg::triClipColorCode = false;
         }
 
+        if(Keyboard::isKeyPressed(Keyboard::Num3)) {
+            fov++;
+            if(fov > 135) {
+                fov = 135;
+            }
+        }
+        if(Keyboard::isKeyPressed(Keyboard::Num4)) {
+            fov--;
+            if(fov < 90) {
+                fov = 90;
+            }
+        }
+        setFOV(fov, &camera);
+
         window.clear();
 
         if(argc == 1) {
@@ -197,7 +208,7 @@ int main(int argc, char** argv)
         spr.setTexture(tex);
         window.draw(spr);
 
-        printf("%d\n", dbg::drawnTris);
+        //printf("%d\n", dbg::drawnTris);
 
         window.display();
     }
