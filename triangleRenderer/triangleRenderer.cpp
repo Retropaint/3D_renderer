@@ -150,7 +150,7 @@ void fillTopFlatTri(Vector3f *verts, Vector3f midPoint, Color color, Triangle tr
     }
 }
 
-void fillTriangle(Triangle tri, Color color, bool baryShading, int modType, bool canCull) {
+void fillTriangle(Triangle tri, Color color, bool canCull) {
     for(int i = 0; i < 3; i++) {
 
         // position the verts in relation to screen space
