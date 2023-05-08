@@ -152,18 +152,7 @@ void fillTopFlatTri(Vector3f *verts, Vector3f midPoint, Color color, Triangle tr
 
 void fillTriangle(Triangle tri, Color color, bool canCull) {
     for(int i = 0; i < 3; i++) {
-
-        // position the verts in relation to screen space
-        if(modType == 1) {
-            tri.verts[i] += tri.pos;
-            tri.verts[i] = rotateX(tri.verts[i], tri.rot.x);
-            tri.verts[i] = rotateY(tri.verts[i], tri.rot.y);
-            tri.verts[i] = rotateZ(tri.verts[i], tri.rot.z);
-            tri.verts[i] = worldToLocalCameraPos(tri.verts[i], camera);
-            tri.verts[i] = worldToScreenPos(tri.verts[i], camera);
-        } else if(modType == 2) {
-            tri.verts[i] = worldToScreenPos(tri.verts[i], camera);
-        }
+        tri.verts[i] = worldToScreenPos(tri.verts[i], camera);
 
         // truncate to prevent floating-point alignment issues with other tri verts
         tri.verts[i] = Vector3f((int)tri.verts[i].x, (int)tri.verts[i].y, (int)tri.verts[i].z);
