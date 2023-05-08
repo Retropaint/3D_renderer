@@ -218,7 +218,7 @@ void renderTriangle(Triangle tri, Color color) {
     }
 
     if(isFullyInView(tri.verts)) {
-        fillTriangle(tri, color, false, 2, true);
+        fillTriangle(tri, color, true);
         return;
     }
 
@@ -238,9 +238,9 @@ void renderTriangle(Triangle tri, Color color) {
 
     for(int i = 0; i < tLen; i++) {
         if(dbg::triClipColorCode) {
-            fillTriangle(tris[i], colors[i], false, 2, false);
+            fillTriangle(tris[i], debugColors[i], false);
         } else {
-            fillTriangle(tris[i], color, false, 2, false);
+            fillTriangle(tris[i], color, false);
         }
     }
 }
