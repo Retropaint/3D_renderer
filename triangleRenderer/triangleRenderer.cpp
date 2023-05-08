@@ -226,7 +226,7 @@ void renderTriangle(Triangle tri, Color color) {
     int tLen;
     clipTriangle(tri, tris, &tLen);
 
-    Color colors[10] = {
+    Color debugColors[10] = {
         Color(255, 0, 0),
         Color(0, 255, 0),
         Color(0, 0, 255),
