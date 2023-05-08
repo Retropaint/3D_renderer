@@ -61,20 +61,20 @@ bool isFullyInView(Vector3f verts[3]) {
     return true;
 }
 
-int clip(Vector3f* verts, Vector3f* points, Vector3f plane) {
+int clip(Vector3f* verts, Vector3f* points, Vector3f planeNormal) {
     int pLen = 0;
     int offset = 0;
 
-    if(plane == planeNear) {
+    if(planeNormal == planeNear) {
         offset = near;
-    } else if(plane == planeFar) {
+    } else if(planeNormal == planeFar) {
         offset = far;
     }
 
     float distances[3];
 
     for(int i = 0; i < 3; i++) {
-        distances[i] = planeNormalDist(verts[i], plane, offset);
+        distances[i] = planeNormalDist(verts[i], planeNormal, offset);
 
         if(distances[i] > 0) {
             points[pLen++] = verts[i];
@@ -84,18 +84,18 @@ int clip(Vector3f* verts, Vector3f* points, Vector3f plane) {
     for(int i = 0; i < 3; i++) {
         for(int j = 0; j < 3; j++) {
 
-            // don't check a vertex against itself
+            // don't check vertex against itself
             if(i == j) {
                 continue;
             }
 
             if(distances[i] > 0 && distances[j] < 0) {
-                if(plane == planeFar) {
-                    points[pLen++] = linePlaneIntersection(verts[i], verts[j], plane, far);
-                } else if(plane == planeNear) {
-                    points[pLen++] = linePlaneIntersection(verts[i], verts[j], plane, -near);
+                if(planeNormal == planeFar) {
+                    points[pLen++] = linePlaneIntersection(verts[i], verts[j], planeNormal, far);
+                } else if(planeNormal == planeNear) {
+                    points[pLen++] = linePlaneIntersection(verts[i], verts[j], planeNormal, -near);
                 } else {
-                    points[pLen++] = linePlaneIntersection(verts[i], verts[j], plane, 0);
+                    points[pLen++] = linePlaneIntersection(verts[i], verts[j], planeNormal, 0);
                 }
             }
         }
