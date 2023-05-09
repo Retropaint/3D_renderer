@@ -12,7 +12,6 @@ using namespace std;
 float near = 5;
 float far = 1000;
 
-
 float planeNormalDist(Vector3f point, Vector3f planeNormal, float offset) {
     if(planeNormal == planeNear) {
         return point.z - offset;
@@ -62,7 +61,7 @@ bool isFullyInView(Vector3f verts[3]) {
 }
 
 int clip(Vector3f* verts, Vector3f* points, Vector3f planeNormal) {
-    int pLen = 0;
+    int pointLen = 0;
     int offset = 0;
 
     if(planeNormal == planeNear) {
@@ -77,7 +76,7 @@ int clip(Vector3f* verts, Vector3f* points, Vector3f planeNormal) {
         distances[i] = planeNormalDist(verts[i], planeNormal, offset);
 
         if(distances[i] > 0) {
-            points[pLen++] = verts[i];
+            points[pointLen++] = verts[i];
         }
     }
 
@@ -91,17 +90,17 @@ int clip(Vector3f* verts, Vector3f* points, Vector3f planeNormal) {
 
             if(distances[i] > 0 && distances[j] < 0) {
                 if(planeNormal == planeFar) {
-                    points[pLen++] = linePlaneIntersection(verts[i], verts[j], planeNormal, far);
+                    points[pointLen++] = linePlaneIntersection(verts[i], verts[j], planeNormal, far);
                 } else if(planeNormal == planeNear) {
-                    points[pLen++] = linePlaneIntersection(verts[i], verts[j], planeNormal, -near);
+                    points[pointLen++] = linePlaneIntersection(verts[i], verts[j], planeNormal, -near);
                 } else {
-                    points[pLen++] = linePlaneIntersection(verts[i], verts[j], planeNormal, 0);
+                    points[pointLen++] = linePlaneIntersection(verts[i], verts[j], planeNormal, 0);
                 }
             }
         }
     }
 
-    return pLen;
+    return pointLen;
 }
 
 void clipTriangle(Triangle mainTri, Triangle *tris, int *tLen) {
@@ -114,16 +113,16 @@ void clipTriangle(Triangle mainTri, Triangle *tris, int *tLen) {
 
     for(int p = 0; p < planeLen; p++) {
 
-        // ignore new tris created from the current plane-clipping wave
+        // do not check new tris created from the current plane-clipping wave
         int currentLen = *tLen;
 
         for(int t = 0; t < currentLen; t++) {
             Triangle tri = tris[t];
 
             Vector3f points[4];
-            int pLen = clip(tri.verts, points, planes[p]);
+            int pointLen = clip(tri.verts, points, planes[p]);
 
-            if(pLen == 2) {
+            if(pointLen == 2) {
                 continue;
             }
 
@@ -133,7 +132,7 @@ void clipTriangle(Triangle mainTri, Triangle *tris, int *tLen) {
             newTri.verts[2] = points[2];
             tris[t] = newTri;
 
-            if(pLen == 4) {
+            if(pointLen == 4) {
                 Triangle newTri2;
                 newTri2.verts[0] = points[1];
                 newTri2.verts[1] = points[2];
