@@ -45,23 +45,33 @@ void drawPixel(Vector3f point, Camera camera, Color color) {
 }
 
 void drawHorizLine(float start, float end, float y, Color color, Vector3f *triVerts) {
+    BaryTriArea startBary = baryCoords(Vector3f(start + 1, y, 0), triVerts);
+    float startZ = 
+        triVerts[0].z * startBary.tri2 +
+        triVerts[1].z * startBary.tri3 +
+        triVerts[2].z * startBary.tri1;
+
+    BaryTriArea endBary = baryCoords(Vector3f(end, y, 0), triVerts);
+    float endZ = 
+        triVerts[0].z * endBary.tri2 +
+        triVerts[1].z * endBary.tri3 +
+        triVerts[2].z * endBary.tri1;
+
     for(int x = (int)start; x < (int)end + 2; x++) {
         if(x < 0 || x > screenWidth) {
             continue;
         }
 
         Vector3f pixel(x, y, 0);
-        
-        BaryTriArea bary = baryCoords(pixel, triVerts);
-        pixel.z = 
-            triVerts[0].z * bary.tri2 +
-            triVerts[1].z * bary.tri3 +
-            triVerts[2].z * bary.tri1;
 
+        float interp = (x - start) / (end + 2 - start);
+        pixel.z = startZ + (endZ - startZ) * interp;
+
+        float lighting = max(20.0f, 255 - pixel.z/4);
         Color shading(
-            min((float)color.r, max(20.0f, 255 - pixel.z/4)),
-            min((float)color.g, max(20.0f, 255 - pixel.z/4)),
-            min((float)color.b, max(20.0f, 255 - pixel.z/4))
+            min((float)color.r, lighting),
+            min((float)color.g, lighting),
+            min((float)color.b, lighting)
         );
         
         drawPixel(pixel, camera, shading);
@@ -211,7 +221,7 @@ void renderTriangle(Triangle tri, Color color) {
         return;
     }
 
-    Triangle tris[10];
+    Triangle tris[20];
     int tLen;
     clipTriangle(tri, tris, &tLen);
 
