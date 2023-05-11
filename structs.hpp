@@ -14,8 +14,6 @@ using namespace sf;
     };
 
     struct Triangle {
-        Vector3f pos;
-        Vector3f rot;
         Vector3f verts[3];
     };
 

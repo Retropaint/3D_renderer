@@ -203,12 +203,8 @@ void fillTriangle(Triangle tri, Color color, bool canCull) {
 
 void renderTriangle(Triangle tri, Color color) {
 
-    // transform triangle into camera space
+    // triangle must be trnasformed to camera space before clipping
     for(int i = 0; i < 3; i++) {
-        tri.verts[i] += tri.pos;
-        tri.verts[i] = rotateX(tri.verts[i], tri.rot.x);
-        tri.verts[i] = rotateY(tri.verts[i], tri.rot.y);
-        tri.verts[i] = rotateZ(tri.verts[i], tri.rot.z);
         tri.verts[i] = worldToLocalCameraPos(tri.verts[i], camera);
     }
 
