@@ -11,7 +11,6 @@ Vector3f worldToScreenPos(Vector3f worldPoint, Camera camera) {
         worldPoint.z = 0.01;
     }
 
-    //...these pixels will then be offset by their perspective projection
     screenPoint.x += camera.near * worldPoint.x / worldPoint.z;
     screenPoint.y += camera.near * worldPoint.y / worldPoint.z;
     
@@ -54,4 +53,14 @@ Vector3f rotateZ(Vector3f point, float angle) {
     newPoint.y = point.x * sin(angle) + point.y * cos(angle);
 
     return newPoint;
+}
+
+float clampAngle(float angle) {
+    if(angle > M_PI/2) {
+        angle = M_PI/2;
+    } else if(angle < -M_PI/2) {
+        angle = -M_PI/2;
+    }
+
+    return angle;
 }

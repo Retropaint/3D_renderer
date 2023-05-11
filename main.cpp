@@ -6,6 +6,7 @@
 #include "objLoader/objLoader.hpp"
 #include "debugger/debugger.hpp"
 #include "cameraPlanes/cameraPlanes.hpp"
+#include "transformer/transformer.hpp"
 
 Vector2i prevMouse;
 
@@ -25,7 +26,10 @@ RectangleShape pixel;
 Object obj;
 Object obj2;
 
+using namespace std;
+
 bool looking = false;
+float shipAngle = 0;
 
 void initTriangle(Triangle *tri, Vector3f triTemplate[3]) {
     tri->verts[0] = triTemplate[0];
@@ -33,23 +37,36 @@ void initTriangle(Triangle *tri, Vector3f triTemplate[3]) {
     tri->verts[2] = triTemplate[2];
 }
 
-void playerMove(Vector3f *pos, float angle, float speed) {
-    pos->x += cos(angle) * speed;
-    pos->z += sin(angle) * speed;
+Vector3f playerMove(Vector3f pos, float angle, float speed) {
+    pos.x += cos(angle) * speed;
+    pos.z += sin(angle) * speed;
+
+    return pos;
+}
+
+void playerMoveControls() {
+    float offset = M_PI/2;
+    if(Keyboard::isKeyPressed(Keyboard::W)) {
+        camera.pos = playerMove(camera.pos, camera.angle.y + offset, 5);
+    } else if(Keyboard::isKeyPressed(Keyboard::S)) {
+        camera.pos = playerMove(camera.pos, camera.angle.y - M_PI + offset, 5);
+    }
+    if(Keyboard::isKeyPressed(Keyboard::A)) {
+        camera.pos = playerMove(camera.pos, camera.angle.y + M_PI/2 + offset, 5);
+    } else if(Keyboard::isKeyPressed(Keyboard::D)) {
+        camera.pos = playerMove(camera.pos, camera.angle.y - M_PI/2 + offset, 5);
+    }
 }
 
 int main(int argc, char** argv) {
-    if(argc == 3) {
+    if(argc >= 3) {
         readObjFile(argv[1], argv[2], &obj);
     } else if(argc == 2) {
         readObjFile(argv[1], (char*)"10", &obj);
     }
-    
-    //readObjFile("airship", (char*)"10", &obj2);
-    for(int i = 0; i < obj2.triLen; i++) {
-        for(int j = 0; j < 3; j++) {
-            obj2.tris[i].verts[j].x += 100;
-        }
+
+    if(argc == 5) {
+        window.setSize(Vector2u(atoi(argv[3]), atoi(argv[4])));
     }
 
     // init camera
@@ -59,14 +76,7 @@ int main(int argc, char** argv) {
     int fov = 90;
 
     initTriangle(&tri, tri2Verts);
-    tri.pos = Vector3f(0, 25, 0);
-    tri.rot = Vector3f(0, 0, 0);
-
     initTriangle(&tri1, tri2Verts);
-    tri.pos = Vector3f(-10, 0, -10);
-    tri.rot = Vector3f(0, M_PI, 0);
-
-    window.setFramerateLimit(60);
 
     pixel.setSize(Vector2f(1, 1));
 
@@ -88,40 +98,30 @@ int main(int argc, char** argv) {
         }
         dbg::drawnTris = 0;
 
-        if(Keyboard::isKeyPressed(Keyboard::Right)) {
-            camera.angle.y -= 0.05;
-        } else if(Keyboard::isKeyPressed(Keyboard::Left)) {
-            camera.angle.y += 0.05;
+        /*
+        if(Keyboard::isKeyPressed(Keyboard::W)) {
+            for(int i = 0; i < obj.triLen; i++) {
+                for(int j = 0; j < 3; j++) {
+                    obj.tris[i].verts[j] = playerMove(obj.tris[i].verts[j], shipAngle + M_PI/2, 5);
+                }
+            }
+        } else if(Keyboard::isKeyPressed(Keyboard::S)) {
+            for(int i = 0; i < obj.triLen; i++) {
+                for(int j = 0; j < 3; j++) {
+                    obj.tris[i].verts[j] = playerMove(obj.tris[i].verts[j], shipAngle - M_PI/2, 5);
+                }
+            }
         }
+        */
+
+       camera.pos = obj.tris[10].verts[0];
+        
         if(Keyboard::isKeyPressed(Keyboard::Up)) {
             camera.pos.y -= 2;
         } else if(Keyboard::isKeyPressed(Keyboard::Down)) {
             camera.pos.y += 2;
         }
-
-        float offset = M_PI/2;
-        if(Keyboard::isKeyPressed(Keyboard::W)) {
-            playerMove(&camera.pos, camera.angle.y + offset, 5);
-        } else if(Keyboard::isKeyPressed(Keyboard::S)) {
-            playerMove(&camera.pos, camera.angle.y - M_PI + offset, 5);
-        }
-        if(Keyboard::isKeyPressed(Keyboard::A)) {
-            playerMove(&camera.pos, camera.angle.y + M_PI/2 + offset, 5);
-        } else if(Keyboard::isKeyPressed(Keyboard::D)) {
-            playerMove(&camera.pos, camera.angle.y - M_PI/2 + offset, 5);
-        }
-
-        if(Keyboard::isKeyPressed(Keyboard::Escape)) {
-            window.close();
-        }
-
-        if(Keyboard::isKeyPressed(Keyboard::Space)) {
-            looking = true;
-        }
-        if(Keyboard::isKeyPressed(Keyboard::Z)) {
-            looking = false;
-        }
-
+        
         if(Keyboard::isKeyPressed(Keyboard::Num1)) {
             dbg::triClipColorCode = true;
         }
@@ -129,21 +129,48 @@ int main(int argc, char** argv) {
             dbg::triClipColorCode = false;
         }
 
+        playerMoveControls();
+
         if(Keyboard::isKeyPressed(Keyboard::Num3)) {
             fov++;
-            if(fov > 135) {
-                fov = 135;
-            }
         }
         if(Keyboard::isKeyPressed(Keyboard::Num4)) {
             fov--;
-            if(fov < 90) {
-                fov = 90;
-            }
         }
+        fov = max(90, min(fov, 135));
         setFOV(fov, &camera);
 
-        window.clear();
+       if(Keyboard::isKeyPressed(Keyboard::Space)) {
+            looking = true;
+        }
+        if(Keyboard::isKeyPressed(Keyboard::Z)) {
+            looking = false;
+        }
+
+        if(Keyboard::isKeyPressed(Keyboard::Escape)) {
+            window.close();
+        }
+
+        if(!looking) {
+            window.setMouseCursorVisible(true);
+        } else {
+
+            // mouse look
+            
+            camera.angle.y -= ((float)Mouse::getPosition().x - (float)prevMouse.x) / 500;
+
+            camera.angle.x += ((float)Mouse::getPosition().y - (float)prevMouse.y) / 500;
+            camera.angle.x = clampAngle(camera.angle.x);
+
+            Vector3f offset = rotateX(Vector3f(0, 0, -100), -camera.angle.x);
+            offset = rotateY(offset, -camera.angle.y);
+            camera.pos += offset;
+
+            // hide and lock cursor
+            window.setMouseCursorVisible(false);
+            Mouse::setPosition(Vector2i(window.getPosition().x + screenWidth/2, window.getPosition().y + screenHeight/2));
+        }
+        prevMouse = Mouse::getPosition();
 
         if(argc == 1) {
             renderTriangle(tri, Color::Magenta);
@@ -160,36 +187,6 @@ int main(int argc, char** argv) {
         Image image;
         image.create(screenWidth, screenHeight);
 
-        if(!looking) {
-            window.setMouseCursorVisible(true);
-        } else {
-
-            // mouse look
-            
-            camera.angle.y -= ((float)Mouse::getPosition().x - (float)prevMouse.x) / 500;
-
-            // clamp mouse Y to 360 deg (2PI rad)
-            if(camera.angle.y < 0) {
-                camera.angle.y = M_PI*2 + camera.angle.y;
-            } else if(camera.angle.y > M_PI*2) {
-                camera.angle.y -= M_PI*2;
-            }
-
-            camera.angle.x += ((float)Mouse::getPosition().y - (float)prevMouse.y) / 500;
-
-            // clamp mouse X to 360 deg (2PI rad)
-            if(camera.angle.x > M_PI/2) {
-                camera.angle.x = M_PI/2;
-            } else if(camera.angle.x < -M_PI/2) {
-                camera.angle.x = -M_PI/2;
-            }
-
-            // hide and lock cursor
-            window.setMouseCursorVisible(false);
-            Mouse::setPosition(Vector2i(window.getPosition().x + screenWidth/2, window.getPosition().y + screenHeight/2));
-        }
-        prevMouse = Mouse::getPosition();
-
         for(int x = 0; x < screenWidth; x++) {
             for(int y = 0; y < screenHeight; y++) {
                 if(depthZ[x][y] != INFINITY) {
@@ -200,7 +197,9 @@ int main(int argc, char** argv) {
                 }
             }
         }
-        
+
+        window.clear();
+
         Texture tex;
         tex.loadFromImage(image);
 
