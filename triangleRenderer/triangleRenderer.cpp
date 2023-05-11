@@ -217,7 +217,7 @@ void renderTriangle(Triangle tri, Color color) {
         return;
     }
 
-    Triangle tris[20];
+    Triangle tris[15];
     int tLen;
     clipTriangle(tri, tris, &tLen);
 
