@@ -18,7 +18,7 @@ using namespace sf;
     };
 
     struct Object {
-        Triangle tris[10000];
+        Triangle *tris;
         int triLen;
     };
 
