@@ -4,7 +4,7 @@
 
 Vector3f worldToScreenPos(Vector3f worldPoint, Camera camera) {
 
-    // on init, all pixels should be centered to the screen...
+    // on init, all pixels should be centered to the screen
     Vector3f screenPoint = Vector3f(screenWidth/2, screenHeight/2, worldPoint.z);
 
     if(worldPoint.z == 0) {
