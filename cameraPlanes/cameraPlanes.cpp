@@ -1,5 +1,6 @@
 #include "directives.hpp"
 #include "cameraPlanes.hpp"
+#include "externs.hpp"
 
 Vector3f planeBottom;
 Vector3f planeTop;
