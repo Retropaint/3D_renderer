@@ -10,5 +10,6 @@ namespace dbg {
     void printMultiVector3(Vector3f *vectors, int len, char* separator);
 
     inline bool triClipColorCode = false;
+    inline bool backFaceCulling = true;
     inline int drawnTris = 0;
 }
