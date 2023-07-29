@@ -27,4 +27,5 @@ target_link_libraries(test ${LIBS})
 
 # includes
 list(APPEND INC "${PROJECT_SOURCE_DIR}")
-target_include_directories(test PRIVATE "${INC}")
+list(APPEND INC "${PROJECT_BINARY_DIR}")
+target_include_directories(test PUBLIC "${INC}")
