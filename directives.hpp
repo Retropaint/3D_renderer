@@ -1,3 +1,3 @@
-#define screenWidth 300
-#define screenHeight 300
+#define screenWidth 800
+#define screenHeight 600
 #define cullTolerance 50
