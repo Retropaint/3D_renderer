@@ -109,23 +109,15 @@ void clipTriangle(Triangle mainTri, Triangle *tris, int *tLen) {
 
     int planeLen = 6;
     Vector3f planes[planeLen] = { planeNear, planeFar, planeLeft, planeRight, planeTop, planeBottom };
-    float offsets[planeLen] = { near, far, 0, 0, 0, 0 };
+    int offset[planeLen] = { near, far, 0, 0, 0, 0 }; 
 
     for(int p = 0; p < planeLen; p++) {
-
-        // do not check new tris created from the current plane-clipping wave
-        int currentLen = *tLen;
-
-        for(int t = 0; t < currentLen; t++) {
+        for(int t = 0; t < *tLen; t++) {
             Triangle tri = tris[t];
 
             Vector3f points[4];
-            int pointLen = clip(tri.verts, points, planes[p]);
-
-            if(pointLen == 2) {
-                continue;
-            }
-
+            int pointLen = clip(tri.verts, points, planes[p], offset[p]);
+            
             Triangle newTri;
             newTri.verts[0] = points[0];
             newTri.verts[1] = points[1];
@@ -139,6 +131,9 @@ void clipTriangle(Triangle mainTri, Triangle *tris, int *tLen) {
                 newTri2.verts[2] = points[3];
                 tris[*tLen] = newTri2;
                 (*tLen)++;
+                
+                // only 1 triangle ever intersects at any moment
+                break;
             }
         }
     }
