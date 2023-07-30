@@ -98,6 +98,7 @@ int main(int argc, char** argv) {
     initTriangle(&tri1, tri1Verts, tri1Texels);
     initTriangle(&tri2, tri2Verts, tri2Texels);
 
+    loadTextures();
 
     while (window.isOpen())
     {
