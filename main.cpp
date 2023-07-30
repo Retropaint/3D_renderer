@@ -7,17 +7,37 @@
 #include "debugger/debugger.hpp"
 #include "cameraPlanes/cameraPlanes.hpp"
 #include "transformer/transformer.hpp"
+#include <stdlib.h>
+#include <stdio.h>
 
 Vector2i prevMouse;
 
-Vector3f tri2Verts[3] = {
-    Vector3f(0, 25, 0),
-    Vector3f(0, 25, 40),
-    Vector3f(10, 25, 0)
+Vector3f tri1Verts[3] = {
+    Vector3f(0, 0, 0),
+    Vector3f(52, 0, 0),
+    Vector3f(52, 22, 0)
 };
 
-struct Triangle tri;
+Vector2i tri1Texels[3] = {
+    Vector2i(0, 0),
+    Vector2i(27, 0),
+    Vector2i(27, 11)
+};
+
+Vector3f tri2Verts[3] = {
+    Vector3f(0, 0, 0),
+    Vector3f(52, 22, 0),
+    Vector3f(0, 22, 0)
+};
+
+Vector2i tri2Texels[3] = {
+    Vector2i(0, 0),
+    Vector2i(27, 11),
+    Vector2i(0, 11)
+};
+
 struct Triangle tri1;
+struct Triangle tri2;
 
 RenderWindow window(VideoMode(screenWidth, screenHeight), "Triangle Clipping", Style::Default);
 Camera camera;
@@ -31,10 +51,11 @@ using namespace std;
 bool looking = false;
 float shipAngle = 0;
 
-void initTriangle(Triangle *tri, Vector3f triTemplate[3]) {
-    tri->verts[0] = triTemplate[0];
-    tri->verts[1] = triTemplate[1];
-    tri->verts[2] = triTemplate[2];
+void initTriangle(Triangle *tri, Vector3f triVertsTemplate[3], Vector2i triTexelsTemplate[3]) {
+    for(int i = 0; i < 3; i++) {
+        tri->verts[i] = triVertsTemplate[i];
+        tri->texels[i] = triTexelsTemplate[i];
+    }
 }
 
 Vector3f playerMove(Vector3f pos, float angle, float speed) {
@@ -75,8 +96,8 @@ int main(int argc, char** argv) {
 
     int fov = 90;
 
-    initTriangle(&tri, tri2Verts);
-    initTriangle(&tri1, tri2Verts);
+    initTriangle(&tri1, tri1Verts, tri1Texels);
+    initTriangle(&tri2, tri2Verts, tri2Texels);
 
     pixel.setSize(Vector2f(1, 1));
 
@@ -173,8 +194,8 @@ int main(int argc, char** argv) {
         prevMouse = Mouse::getPosition();
 
         if(argc == 1) {
-            renderTriangle(tri, Color::Magenta);
-            //renderTriangle(tri1, Color::Magenta);
+            renderTriangle(tri1, Color::Magenta);
+            renderTriangle(tri2, Color::Magenta);
         } else {
             for(int i = 0; i < obj.triLen; i++) {
                 renderTriangle(obj.tris[i], Color::White);
