@@ -60,43 +60,32 @@ bool isFullyInView(Vector3f verts[3]) {
     return true;
 }
 
-int clip(Vector3f* verts, Vector3f* points, Vector3f planeNormal) {
+int clip(Vector3f* verts, Vector3f* points, Vector3f planeNormal, int offset) {
     int pointLen = 0;
-    int offset = 0;
+    int inVertLen = 0;
+    int outVertLen = 0;
+    Vector3f inVerts[3];
+    Vector3f outVerts[3];
 
-    if(planeNormal == planeNear) {
-        offset = near;
-    } else if(planeNormal == planeFar) {
-        offset = far;
-    }
-
-    float distances[3];
-
+    // identify which verts are in or out of plane
     for(int i = 0; i < 3; i++) {
-        distances[i] = planeNormalDist(verts[i], planeNormal, offset);
+        float distance = planeNormalDist(verts[i], planeNormal, offset);
 
-        if(distances[i] > 0) {
+        if(distance > 0) {
             points[pointLen++] = verts[i];
+            inVerts[inVertLen++] = verts[i];
+        } else {
+            outVerts[outVertLen++] = verts[i];
         }
     }
 
-    for(int i = 0; i < 3; i++) {
-        for(int j = 0; j < 3; j++) {
-
-            // don't check vertex against itself
-            if(i == j) {
-                continue;
+    // get points of intersections from in to out verts
+    for(int i = 0; i < inVertLen; i++) {
+        for(int j = 0; j < outVertLen; j++) {
+            if(offset == near) {
+                offset = -near;
             }
-
-            if(distances[i] > 0 && distances[j] < 0) {
-                if(planeNormal == planeFar) {
-                    points[pointLen++] = linePlaneIntersection(verts[i], verts[j], planeNormal, far);
-                } else if(planeNormal == planeNear) {
-                    points[pointLen++] = linePlaneIntersection(verts[i], verts[j], planeNormal, -near);
-                } else {
-                    points[pointLen++] = linePlaneIntersection(verts[i], verts[j], planeNormal, 0);
-                }
-            }
+            points[pointLen++] = linePlaneIntersection(inVerts[i], outVerts[j], planeNormal, offset);
         }
     }
 
