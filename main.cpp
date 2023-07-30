@@ -41,7 +41,6 @@ struct Triangle tri2;
 
 RenderWindow window(VideoMode(screenWidth, screenHeight), "Triangle Clipping", Style::Default);
 Camera camera;
-RectangleShape pixel;
 
 Object obj;
 Object obj2;
@@ -99,7 +98,6 @@ int main(int argc, char** argv) {
     initTriangle(&tri1, tri1Verts, tri1Texels);
     initTriangle(&tri2, tri2Verts, tri2Texels);
 
-    pixel.setSize(Vector2f(1, 1));
 
     while (window.isOpen())
     {
