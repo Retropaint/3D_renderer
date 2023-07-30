@@ -114,6 +114,7 @@ int main(int argc, char** argv) {
         for(int x = 0; x < screenWidth; x++) {
             for(int y = 0; y < screenHeight; y++) {
                 depthZ[x][y] = INFINITY;
+                depthColor[x][y] = Color::White;
             }
         }
         dbg::drawnTris = 0;
@@ -132,9 +133,8 @@ int main(int argc, char** argv) {
                 }
             }
         }
+        camera.pos = obj.tris[10].verts[0];
         */
-
-       camera.pos = obj.tris[10].verts[0];
         
         if(Keyboard::isKeyPressed(Keyboard::Up)) {
             camera.pos.y -= 2;
@@ -142,25 +142,12 @@ int main(int argc, char** argv) {
             camera.pos.y += 2;
         }
         
-        if(Keyboard::isKeyPressed(Keyboard::Num1)) {
-            dbg::triClipColorCode = true;
-        }
-        if(Keyboard::isKeyPressed(Keyboard::Num2)) {
-            dbg::triClipColorCode = false;
-        }
-
         playerMoveControls();
 
-        if(Keyboard::isKeyPressed(Keyboard::Num3)) {
-            fov++;
-        }
-        if(Keyboard::isKeyPressed(Keyboard::Num4)) {
-            fov--;
-        }
         fov = max(90, min(fov, 135));
         setFOV(fov, &camera);
 
-       if(Keyboard::isKeyPressed(Keyboard::Space)) {
+        if(Keyboard::isKeyPressed(Keyboard::Space)) {
             looking = true;
         }
         if(Keyboard::isKeyPressed(Keyboard::Z)) {
@@ -182,10 +169,12 @@ int main(int argc, char** argv) {
             camera.angle.x += ((float)Mouse::getPosition().y - (float)prevMouse.y) / 500;
             camera.angle.x = clampAngle(camera.angle.x);
 
+            /*
             Vector3f offset = rotateX(Vector3f(0, 0, -100), -camera.angle.x);
             offset = rotateY(offset, -camera.angle.y);
             camera.pos += offset;
-
+            */
+            
             // hide and lock cursor
             window.setMouseCursorVisible(false);
             Mouse::setPosition(Vector2i(window.getPosition().x + screenWidth/2, window.getPosition().y + screenHeight/2));
@@ -209,12 +198,7 @@ int main(int argc, char** argv) {
 
         for(int x = 0; x < screenWidth; x++) {
             for(int y = 0; y < screenHeight; y++) {
-                if(depthZ[x][y] != INFINITY) {
-                    //pixel.setPosition(x, y);
-                    //pixel.setFillColor(depthColor[x][y]);
-                    //window.draw(pixel);
-                    image.setPixel(x, y, depthColor[x][y]);
-                }
+                image.setPixel(x, y, depthColor[x][y]);
             }
         }
 
