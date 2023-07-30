@@ -4,3 +4,4 @@
 using namespace sf;
 
 void renderTriangle(Triangle tri, Color color);
+void loadTextures();

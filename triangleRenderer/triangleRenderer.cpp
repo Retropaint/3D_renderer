@@ -10,7 +10,17 @@
 using namespace sf;
 using namespace std;
 
-float triCrossProduct(Vector3f verts[]) {
+Image *texImgs;
+
+Vector2f texels[3];
+float texZ[3];
+
+void loadTextures() {
+    delete[] texImgs;
+    texImgs = new Image[1];
+    texImgs[0].loadFromFile("tex.png");
+}
+
     Vector3f line0 = verts[1] - verts[0];
     Vector3f line1 = verts[2] - verts[0];
 
