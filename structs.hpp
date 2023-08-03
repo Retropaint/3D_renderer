@@ -15,7 +15,7 @@ using namespace sf;
 
     struct Triangle {
         Vector3f verts[3];
-        Vector2i texels[3];
+        Vector2f texels[3];
     };
 
     struct Object {
