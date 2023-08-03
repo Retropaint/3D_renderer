@@ -18,10 +18,10 @@ Vector3f tri1Verts[3] = {
     Vector3f(52, 22, 0)
 };
 
-Vector2i tri1Texels[3] = {
-    Vector2i(0, 0),
-    Vector2i(27, 0),
-    Vector2i(27, 11)
+Vector2f tri1Texels[3] = {
+    Vector2f(0, 0),
+    Vector2f(27, 0),
+    Vector2f(27, 11)
 };
 
 Vector3f tri2Verts[3] = {
@@ -30,10 +30,10 @@ Vector3f tri2Verts[3] = {
     Vector3f(0, 22, 0)
 };
 
-Vector2i tri2Texels[3] = {
-    Vector2i(0, 0),
-    Vector2i(27, 11),
-    Vector2i(0, 11)
+Vector2f tri2Texels[3] = {
+    Vector2f(0, 0),
+    Vector2f(27, 11),
+    Vector2f(0, 11)
 };
 
 struct Triangle tri1;
@@ -49,8 +49,9 @@ using namespace std;
 
 bool looking = false;
 float shipAngle = 0;
+int frames = 0;
 
-void initTriangle(Triangle *tri, Vector3f triVertsTemplate[3], Vector2i triTexelsTemplate[3]) {
+void initTriangle(Triangle *tri, Vector3f triVertsTemplate[3], Vector2f triTexelsTemplate[3]) {
     for(int i = 0; i < 3; i++) {
         tri->verts[i] = triVertsTemplate[i];
         tri->texels[i] = triTexelsTemplate[i];
@@ -109,6 +110,8 @@ int main(int argc, char** argv) {
                 window.close();
             }
         }
+
+        frames++;
 
         // reset frame buffer
         for(int x = 0; x < screenWidth; x++) {
