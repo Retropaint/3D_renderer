@@ -21,25 +21,27 @@ void loadTextures() {
     texImgs[0].loadFromFile("tex.png");
 }
 
+float triCrossProduct(Vector3f verts[3]) {
     Vector3f line0 = verts[1] - verts[0];
     Vector3f line1 = verts[2] - verts[0];
 
     return line0.x * line1.y - line0.y * line1.x;
 }
 
-BaryTriArea baryCoords(Vector3f point, Vector3f verts[3]) {
+BaryTriArea baryCoords(Vector3f point, Vector3f verts[3], bool shouldCrossAreas = false, float areas[3] = 0) {
+    if(shouldCrossAreas) {
+        // the 3 little triangles for area checking
+        Vector3f tri0[3] = { verts[0], point, verts[1] };
+        Vector3f tri1[3] = { verts[1], point, verts[2] };
+        Vector3f tri2[3] = { verts[2], point, verts[0] };
 
-    // the 3 little triangles for area checking
-    Vector3f tri0[3] = { verts[0], point, verts[1] };
-    Vector3f tri1[3] = { verts[1], point, verts[2] };
-    Vector3f tri2[3] = { verts[2], point, verts[0] };
-
-    float area0 = abs(triCrossProduct(tri0));
-    float area1 = abs(triCrossProduct(tri1));
-    float area2 = abs(triCrossProduct(tri2));
+        areas[0] = abs(triCrossProduct(tri0));
+        areas[1] = abs(triCrossProduct(tri1));
+        areas[2] = abs(triCrossProduct(tri2));
+    }
 
     float wholeArea = abs(triCrossProduct(verts));
-    BaryTriArea bary = BaryTriArea(area0 / wholeArea, area1 / wholeArea, area2 / wholeArea);
+    BaryTriArea bary = BaryTriArea(areas[0] / wholeArea, areas[1] / wholeArea, areas[2] / wholeArea);
 
     return bary;
 }
@@ -48,13 +50,11 @@ void drawPixel(Vector3f point, Camera camera, Color color) {
     Vector3i p = Vector3i((int)point.x, (int)point.y, (int)point.z);
 
     // check if this point is closest to camera for this pixel
-    if(point.z <= depthZ[p.x][p.y]) {
-        depthZ[p.x][p.y] = point.z;
+    depthZ[p.x][p.y] = point.z;
         depthColor[p.x][p.y] = color;
-    }
 }
 
-void drawHorizLine(float start, float end, float y, Color color, Vector3f *triVerts) {
+void drawHorizLine(float start, float end, float y, Color color, Vector3f triVerts[3]) {
     BaryTriArea startBary = baryCoords(Vector3f(start + 1, y, 0), triVerts);
     float startZ = 
         triVerts[0].z * startBary.tri2 +
@@ -67,6 +67,26 @@ void drawHorizLine(float start, float end, float y, Color color, Vector3f *triVe
         triVerts[1].z * endBary.tri3 +
         triVerts[2].z * endBary.tri1;
 
+    Vector2f startTex = 
+        texels[0] * startBary.tri2 +
+        texels[1] * startBary.tri3 +
+        texels[2] * startBary.tri1;
+    float startTexZ = 
+        texZ[0] * startBary.tri2 +
+        texZ[1] * startBary.tri3 +
+        texZ[2] * startBary.tri1;
+    startTex *= (1/startTexZ);
+
+    Vector2f endTex = 
+        texels[0] * endBary.tri2 +
+        texels[1] * endBary.tri3 +
+        texels[2] * endBary.tri1;
+    float endTexZ = 
+        texZ[0] * endBary.tri2 +
+        texZ[1] * endBary.tri3 +
+        texZ[2] * endBary.tri1;
+    endTex *= (1/endTexZ);
+
     for(int x = (int)start; x < (int)end + 2; x++) {
         if(x < 0 || x > screenWidth) {
             continue;
@@ -74,8 +94,10 @@ void drawHorizLine(float start, float end, float y, Color color, Vector3f *triVe
 
         Vector3f pixel(x, y, 0);
 
-        float interp = (x - start) / (end + 2 - start);
+        float interp = (x - start) / ((end + 2) - start);
         pixel.z = startZ + (endZ - startZ) * interp;
+        
+        Vector2f tex = startTex + (endTex - startTex) * interp;
 
         float lighting = max(20.0f, 255 - pixel.z/4);
         Color shading(
@@ -83,8 +105,10 @@ void drawHorizLine(float start, float end, float y, Color color, Vector3f *triVe
             min((float)color.g, lighting),
             min((float)color.b, lighting)
         );
-        
-        drawPixel(pixel, camera, shading);
+
+        if(interp > 0) {
+            drawPixel(pixel, camera, texImgs[0].getPixel(tex.x, tex.y));
+        }
     }
 }
 
@@ -98,7 +122,7 @@ void swapVerts(Vector3f *v1, Vector3f *v2) {
     v2->y = temp.y;
 }
 
-void fillBottomFlatTri(Vector3f *verts, Vector3f midPoint, Color color, Triangle tri) {
+void fillBottomFlatTri(Vector3f verts[3], Vector3f midPoint, Color color, Triangle tri) {
     Vector3f rightPoint, leftPoint;
     Vector3f topPoint = verts[0];
     
@@ -134,10 +158,10 @@ void fillBottomFlatTri(Vector3f *verts, Vector3f midPoint, Color color, Triangle
     }
 }
 
-void fillTopFlatTri(Vector3f *verts, Vector3f midPoint, Color color, Triangle tri) {
+void fillTopFlatTri(Vector3f verts[3], Vector3f midPoint, Color color, Triangle tri) {
     Vector3f rightPoint, leftPoint;
     Vector3f bottomPoint = verts[2];
-    
+
     if(verts[1].x > midPoint.x) {
         rightPoint = verts[1];
         leftPoint = midPoint;
@@ -151,12 +175,12 @@ void fillTopFlatTri(Vector3f *verts, Vector3f midPoint, Color color, Triangle tr
 
     float lineStart = bottomPoint.x;
     float lineEnd = bottomPoint.x;
-
+    
     for(int y = bottomPoint.y; y > verts[1].y - 1; y--) {
         if(y < screenHeight - 1 && y > 0) {
             drawHorizLine(lineStart, lineEnd, y, color, tri.verts);
         }
-        
+
         lineStart -= slopeLeft;
         lineEnd -= slopeRight;
 
@@ -170,11 +194,82 @@ void fillTopFlatTri(Vector3f *verts, Vector3f midPoint, Color color, Triangle tr
     }
 }
 
-void fillTriangle(Triangle tri, Color color, bool canCull) {
+void newFillTriangle(Triangle tri, Color color, bool canCull) {
+    Vector2f minBounds(INFINITY, INFINITY);
+    Vector2f maxBounds(0, 0);
+    
     for(int i = 0; i < 3; i++) {
         tri.verts[i] = worldToScreenPos(tri.verts[i], camera);
 
-        // truncate to prevent floating-point alignment issues with other tri verts
+        minBounds = Vector2f(
+            min(minBounds.x, max(tri.verts[i].x, 1.0f)),
+            min(minBounds.y, max(tri.verts[i].y, 1.0f))
+        );
+
+        maxBounds = Vector2f(
+            max(maxBounds.x, min(tri.verts[i].x, (float)screenWidth)-1),
+            max(maxBounds.y, min(tri.verts[i].y, (float)screenHeight)-1)
+        );
+    }
+
+    bool hasPassedEdge = false;
+
+    for(float y = minBounds.y; y < maxBounds.y; y++) {
+        for(float x = minBounds.x; x < maxBounds.x; x++) {
+            if(x == minBounds.x) {
+                hasPassedEdge = false;
+            }
+            Vector3f line1[3] = { tri.verts[0], Vector3f(x, y, 0), tri.verts[1] };
+            Vector3f line2[3] = { tri.verts[1], Vector3f(x, y, 0), tri.verts[2], };
+            Vector3f line3[3] = { tri.verts[2], Vector3f(x, y, 0), tri.verts[0] };
+            float areas[3] = { triCrossProduct(line1), triCrossProduct(line2), triCrossProduct(line3) };
+
+            if((areas[0] > 0 || areas[1] > 0 || areas[2] > 0) && (areas[0] < 0 || areas[1] < 0 || areas[2] < 0)) {
+                if(hasPassedEdge) {
+                    hasPassedEdge = false;
+                    break;
+                } else {
+                    continue;
+                }
+            }
+
+            hasPassedEdge = true;
+            
+            BaryTriArea bary = baryCoords(Vector3f(x, y, 0), tri.verts, false, areas);
+
+            float z = 
+                texZ[0] * bary.tri2 +
+                texZ[1] * bary.tri3 +
+                texZ[2] * bary.tri1;
+            
+            if(z > depthZ[(int)x][(int)y]) {
+                continue;
+            }
+            
+            Vector2f texel = 
+                texels[0] * bary.tri2 +
+                texels[1] * bary.tri3 +
+                texels[2] * bary.tri1;
+            texel *= (1/z);
+
+            drawPixel(Vector3f(x, y, z), camera, texImgs[0].getPixel(texel.x, texel.y));
+        }
+    }
+}
+
+void fillTriangle(Triangle tri, Color color, bool canCull) {
+    for(int i = 0; i < 3; i++) {
+        texels[i] = (Vector2f)tri.texels[i]/tri.verts[i].z;
+        texZ[i] = 1/tri.verts[i].z;
+    }
+    
+    newFillTriangle(tri, color, canCull);
+    return;
+
+    for(int i = 0; i < 3; i++) {
+        tri.verts[i] = worldToScreenPos(tri.verts[i], camera);
+
+        // truncate to prevent floating-point alignment issues with other triangle verts
         tri.verts[i] = Vector3f((int)tri.verts[i].x, (int)tri.verts[i].y, (int)tri.verts[i].z);
     }
 
@@ -182,12 +277,11 @@ void fillTriangle(Triangle tri, Color color, bool canCull) {
         return;
     }
 
-    // separate sorted tri verts (by descending y), so the original order can be sent and make bary coords easier to do
+    // separate sorted triangle verts, as bary coords will use original order
     Vector3f sortedVerts[3];
     sortedVerts[0] = Vector3f(tri.verts[0].x, tri.verts[0].y, tri.verts[0].z);
     sortedVerts[1] = Vector3f(tri.verts[1].x, tri.verts[1].y, tri.verts[1].z);
     sortedVerts[2] = Vector3f(tri.verts[2].x, tri.verts[2].y, tri.verts[2].z);
-
     if(sortedVerts[0].y > sortedVerts[1].y) {
         swapVerts(&sortedVerts[0], &sortedVerts[1]);
     }
@@ -198,9 +292,9 @@ void fillTriangle(Triangle tri, Color color, bool canCull) {
         swapVerts(&sortedVerts[1], &sortedVerts[2]);
     }
 
-    float t = (sortedVerts[1].y - sortedVerts[0].y) / (sortedVerts[2].y - sortedVerts[0].y);
+    float xInterp = (sortedVerts[1].y - sortedVerts[0].y) / (sortedVerts[2].y - sortedVerts[0].y);
     Vector3f midPoint = Vector3f(
-        (int)(sortedVerts[0].x + ((sortedVerts[2].x - sortedVerts[0].x) * t)), 
+        (int)(sortedVerts[0].x + ((sortedVerts[2].x - sortedVerts[0].x) * xInterp)),
         (int)sortedVerts[1].y,
         0
     );
@@ -213,7 +307,7 @@ void fillTriangle(Triangle tri, Color color, bool canCull) {
 
 void renderTriangle(Triangle tri, Color color) {
 
-    // triangle must be trnasformed to camera space before clipping
+    // move triangle relative to camera
     for(int i = 0; i < 3; i++) {
         tri.verts[i] = worldToLocalCameraPos(tri.verts[i], camera);
     }
@@ -223,7 +317,7 @@ void renderTriangle(Triangle tri, Color color) {
     }
 
     if(isFullyInView(tri.verts)) {
-        fillTriangle(tri, color, true);
+        fillTriangle(tri, color, dbg::backFaceCulling);
         return;
     }
 
@@ -242,10 +336,6 @@ void renderTriangle(Triangle tri, Color color) {
     };
 
     for(int i = 0; i < tLen; i++) {
-        if(dbg::triClipColorCode) {
-            fillTriangle(tris[i], debugColors[i], false);
-        } else {
-            fillTriangle(tris[i], color, false);
-        }
+        fillTriangle(tris[i], (dbg::triClipColorCode) ? debugColors[i] : color, false);
     }
 }
