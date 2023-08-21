@@ -6,6 +6,8 @@ set(CMAKE_CXX_COMPILER g++)
 project(test)
 add_executable(test main.cpp)
 
+include_directories(${PROJECT_SOURCE_DIR})
+
 add_subdirectory(triangleRenderer)
 add_subdirectory(debugger)
 add_subdirectory(transformer)
