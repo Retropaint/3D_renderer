@@ -102,7 +102,7 @@ void clipTriangle(Triangle mainTri, Triangle *tris, int *tLen) {
     tris[0] = mainTri;
     *tLen = 1;
 
-    int planeLen = 6;
+    const int planeLen = 6;
     Vector3f planes[planeLen] = { planeNear, planeFar, planeLeft, planeRight, planeTop, planeBottom };
     float offset[planeLen] = { near, far, 0, 0, 0, 0 };
 
