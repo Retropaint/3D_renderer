@@ -210,12 +210,8 @@ void newFillTriangle(Triangle tri, Color color, bool canCull) {
         );
     }
 
-    bool hasPassedEdge = false;
-
     for(float y = minBounds.y; y < maxBounds.y; y++) {
         for(float x = minBounds.x; x < maxBounds.x; x++) {
-            if(x == minBounds.x) {
-                hasPassedEdge = false;
             }
             Vector3f line1[3] = { tri.verts[0], Vector3f(x, y, 0), tri.verts[1] };
             Vector3f line2[3] = { tri.verts[1], Vector3f(x, y, 0), tri.verts[2], };
@@ -223,16 +219,9 @@ void newFillTriangle(Triangle tri, Color color, bool canCull) {
             float areas[3] = { triCrossProduct(line1), triCrossProduct(line2), triCrossProduct(line3) };
 
             if((areas[0] > 0 || areas[1] > 0 || areas[2] > 0) && (areas[0] < 0 || areas[1] < 0 || areas[2] < 0)) {
-                if(hasPassedEdge) {
-                    hasPassedEdge = false;
-                    break;
-                } else {
-                    continue;
-                }
+                continue;
             }
 
-            hasPassedEdge = true;
-            
             BaryTriArea bary = baryCoords(Vector3f(x, y, 0), tri.verts, false, areas);
 
             float z = 
