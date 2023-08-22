@@ -210,9 +210,8 @@ void newFillTriangle(Triangle tri, Color color, bool canCull) {
         );
     }
 
-    for(float y = minBounds.y; y < maxBounds.y; y++) {
-        for(float x = minBounds.x; x < maxBounds.x; x++) {
-            }
+    for(float y = floor(minBounds.y); y < ceil(maxBounds.y); y++) {
+        for(float x = floor(minBounds.x); x < ceil(maxBounds.x); x++) {
             Vector3f line1[3] = { tri.verts[0], Vector3f(x, y, 0), tri.verts[1] };
             Vector3f line2[3] = { tri.verts[1], Vector3f(x, y, 0), tri.verts[2], };
             Vector3f line3[3] = { tri.verts[2], Vector3f(x, y, 0), tri.verts[0] };
