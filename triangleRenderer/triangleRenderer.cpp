@@ -18,7 +18,7 @@ float texZ[3];
 void loadTextures() {
     delete[] texImgs;
     texImgs = new Image[1];
-    texImgs[0].loadFromFile("tex.png");
+    texImgs[0].loadFromFile("tex.jpg");
 }
 
 float triCrossProduct(Vector3f verts[3]) {
