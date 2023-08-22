@@ -20,8 +20,8 @@ Vector3f tri1Verts[3] = {
 
 Vector2f tri1Texels[3] = {
     Vector2f(0, 0),
-    Vector2f(27, 0),
-    Vector2f(27, 11)
+    Vector2f(4096, 0),
+    Vector2f(4096, 2730)
 };
 
 Vector3f tri2Verts[3] = {
@@ -32,8 +32,8 @@ Vector3f tri2Verts[3] = {
 
 Vector2f tri2Texels[3] = {
     Vector2f(0, 0),
-    Vector2f(27, 11),
-    Vector2f(0, 11)
+    Vector2f(4096, 2730),
+    Vector2f(0, 2730)
 };
 
 struct Triangle tri1;
