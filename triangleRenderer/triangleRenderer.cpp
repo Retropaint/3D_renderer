@@ -223,22 +223,27 @@ void newFillTriangle(Triangle tri, Color color, bool canCull) {
 
             BaryTriArea bary = baryCoords(Vector3f(x, y, 0), tri.verts, false, areas);
 
-            float z = 
+            float realZ = 
+                tri.verts[0].z * bary.tri2 +
+                tri.verts[1].z * bary.tri3 +
+                tri.verts[2].z * bary.tri1;
+
+            if(realZ > depthZ[(int)x][(int)y]) {
+                continue;
+            }
+
+            float finalTexZ = 
                 texZ[0] * bary.tri2 +
                 texZ[1] * bary.tri3 +
                 texZ[2] * bary.tri1;
-            
-            if(z > depthZ[(int)x][(int)y]) {
-                continue;
-            }
             
             Vector2f texel = 
                 texels[0] * bary.tri2 +
                 texels[1] * bary.tri3 +
                 texels[2] * bary.tri1;
-            texel *= (1/z);
+            texel *= (1/finalTexZ);
 
-            drawPixel(Vector3f(x, y, z), camera, texImgs[0].getPixel(texel.x, texel.y));
+            drawPixel(Vector3f(x, y, realZ), camera, texImgs[0].getPixel(texel.x, texel.y));
         }
     }
 }
