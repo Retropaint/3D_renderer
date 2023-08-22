@@ -49,10 +49,11 @@ void drawPixel(Vector3f point, Camera camera, Color color) {
 
     // check if this point is closest to camera for this pixel
     depthZ[p.x][p.y] = point.z;
-        depthColor[p.x][p.y] = color;
+    depthColor[p.x][p.y] = color;
 }
 
 void fillTriangle(Triangle tri, Color color, bool canCull) {
+    // cache perspective-correct texel coords
     for(int i = 0; i < 3; i++) {
         texels[i] = (Vector2f)tri.texels[i]/tri.verts[i].z;
         texZ[i] = 1/tri.verts[i].z;
@@ -60,7 +61,6 @@ void fillTriangle(Triangle tri, Color color, bool canCull) {
 
     Vector2f minBounds(INFINITY, INFINITY);
     Vector2f maxBounds(0, 0);
-    
     for(int i = 0; i < 3; i++) {
         tri.verts[i] = worldToScreenPos(tri.verts[i], camera);
 
@@ -75,15 +75,25 @@ void fillTriangle(Triangle tri, Color color, bool canCull) {
         );
     }
 
+    // rounding bounds prevents misalignment on connecting triangles
     for(float y = floor(minBounds.y); y < ceil(maxBounds.y); y++) {
         for(float x = floor(minBounds.x); x < ceil(maxBounds.x); x++) {
+
+            // cache cross-product results, for bary coords later
             Vector3f line1[3] = { tri.verts[0], Vector3f(x, y, 0), tri.verts[1] };
             Vector3f line2[3] = { tri.verts[1], Vector3f(x, y, 0), tri.verts[2], };
             Vector3f line3[3] = { tri.verts[2], Vector3f(x, y, 0), tri.verts[0] };
-            float areas[3] = { triCrossProduct(line1), triCrossProduct(line2), triCrossProduct(line3) };
+            float areas[3] = { 
+                triCrossProduct(line1), 
+                triCrossProduct(line2), 
+                triCrossProduct(line3) 
+            };
 
-            if((areas[0] > 0 || areas[1] > 0 || areas[2] > 0) && (areas[0] < 0 || areas[1] < 0 || areas[2] < 0)) {
-                continue;
+            // discard if point is not in triangle (checked with winding)
+            if(
+                (areas[0] > 0 || areas[1] > 0 || areas[2] > 0) &&
+                (areas[0] < 0 || areas[1] < 0 || areas[2] < 0)) {
+                    continue;
             }
 
             BaryTriArea bary = baryCoords(Vector3f(x, y, 0), tri.verts, false, areas);
@@ -92,7 +102,6 @@ void fillTriangle(Triangle tri, Color color, bool canCull) {
                 tri.verts[0].z * bary.tri2 +
                 tri.verts[1].z * bary.tri3 +
                 tri.verts[2].z * bary.tri1;
-
             if(realZ > depthZ[(int)x][(int)y]) {
                 continue;
             }
@@ -101,7 +110,6 @@ void fillTriangle(Triangle tri, Color color, bool canCull) {
                 texZ[0] * bary.tri2 +
                 texZ[1] * bary.tri3 +
                 texZ[2] * bary.tri1;
-            
             Vector2f texel = 
                 texels[0] * bary.tri2 +
                 texels[1] * bary.tri3 +
