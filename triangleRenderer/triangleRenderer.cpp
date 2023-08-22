@@ -29,16 +29,14 @@ float triCrossProduct(Vector3f verts[3]) {
 }
 
 BaryTriArea baryCoords(Vector3f point, Vector3f verts[3], bool shouldCrossAreas = false, float areas[3] = 0) {
-    if(shouldCrossAreas) {
-        // the 3 little triangles for area checking
-        Vector3f tri0[3] = { verts[0], point, verts[1] };
-        Vector3f tri1[3] = { verts[1], point, verts[2] };
-        Vector3f tri2[3] = { verts[2], point, verts[0] };
+    // the 3 little triangles for area checking
+    Vector3f tri0[3] = { verts[0], point, verts[1] };
+    Vector3f tri1[3] = { verts[1], point, verts[2] };
+    Vector3f tri2[3] = { verts[2], point, verts[0] };
 
-        areas[0] = abs(triCrossProduct(tri0));
-        areas[1] = abs(triCrossProduct(tri1));
-        areas[2] = abs(triCrossProduct(tri2));
-    }
+    areas[0] = abs(triCrossProduct(tri0));
+    areas[1] = abs(triCrossProduct(tri1));
+    areas[2] = abs(triCrossProduct(tri2));
 
     float wholeArea = abs(triCrossProduct(verts));
     BaryTriArea bary = BaryTriArea(areas[0] / wholeArea, areas[1] / wholeArea, areas[2] / wholeArea);
