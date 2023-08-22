@@ -52,147 +52,12 @@ void drawPixel(Vector3f point, Camera camera, Color color) {
         depthColor[p.x][p.y] = color;
 }
 
-void drawHorizLine(float start, float end, float y, Color color, Vector3f triVerts[3]) {
-    BaryTriArea startBary = baryCoords(Vector3f(start + 1, y, 0), triVerts);
-    float startZ = 
-        triVerts[0].z * startBary.tri2 +
-        triVerts[1].z * startBary.tri3 +
-        triVerts[2].z * startBary.tri1;
-
-    BaryTriArea endBary = baryCoords(Vector3f(end, y, 0), triVerts);
-    float endZ = 
-        triVerts[0].z * endBary.tri2 +
-        triVerts[1].z * endBary.tri3 +
-        triVerts[2].z * endBary.tri1;
-
-    Vector2f startTex = 
-        texels[0] * startBary.tri2 +
-        texels[1] * startBary.tri3 +
-        texels[2] * startBary.tri1;
-    float startTexZ = 
-        texZ[0] * startBary.tri2 +
-        texZ[1] * startBary.tri3 +
-        texZ[2] * startBary.tri1;
-    startTex *= (1/startTexZ);
-
-    Vector2f endTex = 
-        texels[0] * endBary.tri2 +
-        texels[1] * endBary.tri3 +
-        texels[2] * endBary.tri1;
-    float endTexZ = 
-        texZ[0] * endBary.tri2 +
-        texZ[1] * endBary.tri3 +
-        texZ[2] * endBary.tri1;
-    endTex *= (1/endTexZ);
-
-    for(int x = (int)start; x < (int)end + 2; x++) {
-        if(x < 0 || x > screenWidth) {
-            continue;
-        }
-
-        Vector3f pixel(x, y, 0);
-
-        float interp = (x - start) / ((end + 2) - start);
-        pixel.z = startZ + (endZ - startZ) * interp;
-        
-        Vector2f tex = startTex + (endTex - startTex) * interp;
-
-        float lighting = max(20.0f, 255 - pixel.z/4);
-        Color shading(
-            min((float)color.r, lighting),
-            min((float)color.g, lighting),
-            min((float)color.b, lighting)
-        );
-
-        if(interp > 0) {
-            drawPixel(pixel, camera, texImgs[0].getPixel(tex.x, tex.y));
-        }
-    }
-}
-
-void swapVerts(Vector3f *v1, Vector3f *v2) {
-    Vector3f temp = *v1;
-    
-    v1->x = v2->x;
-    v1->y = v2->y;
-
-    v2->x = temp.x;
-    v2->y = temp.y;
-}
-
-void fillBottomFlatTri(Vector3f verts[3], Vector3f midPoint, Color color, Triangle tri) {
-    Vector3f rightPoint, leftPoint;
-    Vector3f topPoint = verts[0];
-    
-    if(verts[1].x > midPoint.x) {
-        rightPoint = verts[1];
-        leftPoint = midPoint;
-    } else {
-        rightPoint = midPoint;
-        leftPoint = verts[1];
+void fillTriangle(Triangle tri, Color color, bool canCull) {
+    for(int i = 0; i < 3; i++) {
+        texels[i] = (Vector2f)tri.texels[i]/tri.verts[i].z;
+        texZ[i] = 1/tri.verts[i].z;
     }
 
-    float slopeLeft = (leftPoint.x - topPoint.x) / (leftPoint.y - topPoint.y);
-    float slopeRight = (rightPoint.x - topPoint.x) / (rightPoint.y - topPoint.y);
-
-    float lineStart = topPoint.x;
-    float lineEnd = topPoint.x;
-
-    for(int y = topPoint.y; y < verts[1].y + 1; y++) {
-        if(y < screenHeight - 1 && y > 0) {
-            drawHorizLine(lineStart, lineEnd, y, color, tri.verts);
-        }
-
-        lineStart += slopeLeft;
-        lineEnd += slopeRight;
-
-        // make sure lines do not overstep
-        if(leftPoint.x < topPoint.x) {
-            lineStart = max(lineStart, leftPoint.x);
-        }
-        if(rightPoint.x > topPoint.x) {
-            lineEnd = min(lineEnd, rightPoint.x);
-        }
-    }
-}
-
-void fillTopFlatTri(Vector3f verts[3], Vector3f midPoint, Color color, Triangle tri) {
-    Vector3f rightPoint, leftPoint;
-    Vector3f bottomPoint = verts[2];
-
-    if(verts[1].x > midPoint.x) {
-        rightPoint = verts[1];
-        leftPoint = midPoint;
-    } else {
-        rightPoint = midPoint;
-        leftPoint = verts[1];
-    }
-
-    float slopeLeft = (bottomPoint.x - leftPoint.x) / (bottomPoint.y - leftPoint.y);
-    float slopeRight = (bottomPoint.x - rightPoint.x) / (bottomPoint.y - rightPoint.y);
-
-    float lineStart = bottomPoint.x;
-    float lineEnd = bottomPoint.x;
-    
-    for(int y = bottomPoint.y; y > verts[1].y - 1; y--) {
-        if(y < screenHeight - 1 && y > 0) {
-            drawHorizLine(lineStart, lineEnd, y, color, tri.verts);
-        }
-
-        lineStart -= slopeLeft;
-        lineEnd -= slopeRight;
-
-        // make sure lines do not overstep
-        if(leftPoint.x < bottomPoint.x) {
-            lineStart = max(lineStart, leftPoint.x);
-        }
-        if(rightPoint.x > bottomPoint.x) {
-            lineEnd = min(lineEnd, rightPoint.x);
-        }
-    }
-}
-
-void newFillTriangle(Triangle tri, Color color, bool canCull) {
     Vector2f minBounds(INFINITY, INFINITY);
     Vector2f maxBounds(0, 0);
     
@@ -248,56 +113,7 @@ void newFillTriangle(Triangle tri, Color color, bool canCull) {
     }
 }
 
-void fillTriangle(Triangle tri, Color color, bool canCull) {
-    for(int i = 0; i < 3; i++) {
-        texels[i] = (Vector2f)tri.texels[i]/tri.verts[i].z;
-        texZ[i] = 1/tri.verts[i].z;
-    }
-    
-    newFillTriangle(tri, color, canCull);
-    return;
-
-    for(int i = 0; i < 3; i++) {
-        tri.verts[i] = worldToScreenPos(tri.verts[i], camera);
-
-        // truncate to prevent floating-point alignment issues with other triangle verts
-        tri.verts[i] = Vector3f((int)tri.verts[i].x, (int)tri.verts[i].y, (int)tri.verts[i].z);
-    }
-
-    if(canCull && triCrossProduct(tri.verts) < 0) {
-        return;
-    }
-
-    // separate sorted triangle verts, as bary coords will use original order
-    Vector3f sortedVerts[3];
-    sortedVerts[0] = Vector3f(tri.verts[0].x, tri.verts[0].y, tri.verts[0].z);
-    sortedVerts[1] = Vector3f(tri.verts[1].x, tri.verts[1].y, tri.verts[1].z);
-    sortedVerts[2] = Vector3f(tri.verts[2].x, tri.verts[2].y, tri.verts[2].z);
-    if(sortedVerts[0].y > sortedVerts[1].y) {
-        swapVerts(&sortedVerts[0], &sortedVerts[1]);
-    }
-    if(sortedVerts[0].y > sortedVerts[2].y) {
-        swapVerts(&sortedVerts[0], &sortedVerts[2]);
-    }
-    if(sortedVerts[1].y > sortedVerts[2].y) {
-        swapVerts(&sortedVerts[1], &sortedVerts[2]);
-    }
-
-    float xInterp = (sortedVerts[1].y - sortedVerts[0].y) / (sortedVerts[2].y - sortedVerts[0].y);
-    Vector3f midPoint = Vector3f(
-        (int)(sortedVerts[0].x + ((sortedVerts[2].x - sortedVerts[0].x) * xInterp)),
-        (int)sortedVerts[1].y,
-        0
-    );
-
-    fillBottomFlatTri(sortedVerts, midPoint, color, tri);
-    fillTopFlatTri(sortedVerts, midPoint, color, tri);
-
-    dbg::drawnTris++;
-}
-
 void renderTriangle(Triangle tri, Color color) {
-
     // move triangle relative to camera
     for(int i = 0; i < 3; i++) {
         tri.verts[i] = worldToLocalCameraPos(tri.verts[i], camera);
