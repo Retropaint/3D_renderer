@@ -27,6 +27,12 @@ using namespace sf;
         float tri1;
         float tri2;
         float tri3;
+
+        BaryTriArea(float ntri1, float ntri2, float ntri3) {
+            tri1 = ntri1;
+            tri2 = ntri2;
+            tri3 = ntri3;
+        }
     };
 #endif
 
