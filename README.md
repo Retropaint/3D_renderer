@@ -4,8 +4,9 @@ The main branch is software-rendered, while the hwa-rendered branch is for NVIDI
 
 # Build Instructions
 1. Clone project
-2. Build with CMake
-2.1 Install CMake. Verify by running `cmake` in terminal. If you get instructions on how to use CMake, it's installed successfully.
-2.2 create a new folder (preferrably beside the clone)
-2.3 `cd` to the new folder in terminal and type `cmake [RELATIVE_PATH_TO_CLONE]`.
-2.4 type `cmake build .`.
+1. Build with CMake
+
+## For HWA-rendering branch
+This has to be done before building with CMake
+1. compile hwaCrossProducts (don't link it) using `nvcc` (sfml libs have to be stated).
+2. Create a lib out of the object file with `ar rcs`
