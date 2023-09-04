@@ -63,16 +63,12 @@ void fillTriangle(Triangle tri, Color color, bool canCull) {
     Vector2f maxBounds(0, 0);
     for(int i = 0; i < 3; i++) {
         tri.verts[i] = worldToScreenPos(tri.verts[i], camera);
+        minBounds.x = min(minBounds.x, max(tri.verts[i].x, 1.0f));
+        minBounds.y = min(minBounds.y, max(tri.verts[i].y, 1.0f));
+        maxBounds.x = max(maxBounds.x, min(tri.verts[i].x, (float)screenWidth)-1);
+        maxBounds.y = max(maxBounds.y, min(tri.verts[i].y, (float)screenHeight)-1);
+    }
 
-        minBounds = Vector2f(
-            min(minBounds.x, max(tri.verts[i].x, 1.0f)),
-            min(minBounds.y, max(tri.verts[i].y, 1.0f))
-        );
-
-        maxBounds = Vector2f(
-            max(maxBounds.x, min(tri.verts[i].x, (float)screenWidth)-1),
-            max(maxBounds.y, min(tri.verts[i].y, (float)screenHeight)-1)
-        );
     }
 
     // rounding bounds prevents misalignment on connecting triangles
