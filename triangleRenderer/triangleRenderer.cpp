@@ -76,17 +76,31 @@ void fillTriangle(Triangle tri, Color color, bool canCull) {
     wholeArea = abs(wholeArea);
 
     // rounding bounds prevents misalignment on connecting triangles
-    for(float y = floor(minBounds.y); y < ceil(maxBounds.y); y++) {
-        for(float x = floor(minBounds.x); x < ceil(maxBounds.x); x++) {
+    for(float y = floor(minBounds.y); y < ceil(maxBounds.y)+1; y++) {
+        Vector3f leftLine1[3] = { tri.verts[0], Vector3f(floor(minBounds.x), y, 0), tri.verts[1] };
+        Vector3f leftLine2[3] = { tri.verts[1], Vector3f(floor(minBounds.x), y, 0), tri.verts[2] };
+        Vector3f leftLine3[3] = { tri.verts[2], Vector3f(floor(minBounds.x), y, 0), tri.verts[0] };
+        float leftAreas[3] = { 
+            triCrossProduct(leftLine1),
+            triCrossProduct(leftLine2),
+            triCrossProduct(leftLine3)
+        };
 
-            // cache cross-product results, for bary coords later
-            Vector3f line1[3] = { tri.verts[0], Vector3f(x, y, 0), tri.verts[1] };
-            Vector3f line2[3] = { tri.verts[1], Vector3f(x, y, 0), tri.verts[2], };
-            Vector3f line3[3] = { tri.verts[2], Vector3f(x, y, 0), tri.verts[0] };
-            float areas[3] = { 
-                triCrossProduct(line1), 
-                triCrossProduct(line2), 
-                triCrossProduct(line3) 
+        Vector3f rightLine1[3] = { tri.verts[0], Vector3f(ceil(maxBounds.x), y, 0), tri.verts[1] };
+        Vector3f rightLine2[3] = { tri.verts[1], Vector3f(ceil(maxBounds.x), y, 0), tri.verts[2] };
+        Vector3f rightLine3[3] = { tri.verts[2], Vector3f(ceil(maxBounds.x), y, 0), tri.verts[0] };
+        float rightAreas[3] = { 
+            triCrossProduct(rightLine1),
+            triCrossProduct(rightLine2),
+            triCrossProduct(rightLine3)
+        };
+
+        for(float x = floor(minBounds.x); x < ceil(maxBounds.x)+1; x++) {
+            float interp = (x - floor(minBounds.x)) / (ceil(maxBounds.x) - floor(minBounds.x));
+            float areas[3] = {
+                leftAreas[0] + ((rightAreas[0] - leftAreas[0]) * interp),
+                leftAreas[1] + ((rightAreas[1] - leftAreas[1]) * interp),
+                leftAreas[2] + ((rightAreas[2] - leftAreas[2]) * interp)
             };
 
             // discard if point is not in triangle (checked with winding)
@@ -96,7 +110,11 @@ void fillTriangle(Triangle tri, Color color, bool canCull) {
                     continue;
             }
 
-            BaryTriArea bary = baryCoords(Vector3f(x, y, 0), tri.verts, false, areas);
+            BaryTriArea bary = BaryTriArea(
+                abs(areas[0])/wholeArea, 
+                abs(areas[1])/wholeArea, 
+                abs(areas[2])/wholeArea
+            );
 
             float realZ = 
                 tri.verts[0].z * bary.tri2 +
