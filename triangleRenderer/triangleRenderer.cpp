@@ -69,7 +69,11 @@ void fillTriangle(Triangle tri, Color color, bool canCull) {
         maxBounds.y = max(maxBounds.y, min(tri.verts[i].y, (float)screenHeight)-1);
     }
 
+    float wholeArea = triCrossProduct(tri.verts);
+    if(canCull && wholeArea < 0) {
+        return;
     }
+    wholeArea = abs(wholeArea);
 
     // rounding bounds prevents misalignment on connecting triangles
     for(float y = floor(minBounds.y); y < ceil(maxBounds.y); y++) {
