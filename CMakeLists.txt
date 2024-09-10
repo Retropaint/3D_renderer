@@ -7,6 +7,10 @@ add_executable(test main.cpp)
 
 include_directories(${PROJECT_SOURCE_DIR})
 
+# SFML installed from Homebrew
+include_directories("/opt/homebrew/Cellar/sfml/2.6.1/include")
+target_link_directories(test PRIVATE "/opt/homebrew/Cellar/sfml/2.6.1/lib")
+
 add_subdirectory(triangleRenderer)
 add_subdirectory(debugger)
 add_subdirectory(transformer)
