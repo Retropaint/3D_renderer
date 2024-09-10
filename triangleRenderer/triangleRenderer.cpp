@@ -134,7 +134,9 @@ void fillTriangle(Triangle tri, Color color, bool canCull) {
                 texels[2] * bary.tri1;
             texel *= (1/finalTexZ);
 
-            drawPixel(Vector3f(x, y, realZ), camera, texImgs[0].getPixel(texel.x, texel.y));
+			// don't use textures for now
+            //drawPixel(Vector3f(x, y, realZ), camera, texImgs[0].getPixel(texel.x, texel.y));
+            drawPixel(Vector3f(x, y, realZ), camera, Color::Green);
         }
     }
 }
