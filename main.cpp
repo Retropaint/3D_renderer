@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
     initTriangle(&tri1, tri1Verts, tri1Texels);
     initTriangle(&tri2, tri2Verts, tri2Texels);
 
-    loadTextures();
+    //loadTextures();
 
     while (window.isOpen())
     {
@@ -111,13 +111,15 @@ int main(int argc, char** argv) {
             }
         }
 
+        window.clear();
+
         frames++;
 
         // reset frame buffer
         for(int x = 0; x < screenWidth; x++) {
             for(int y = 0; y < screenHeight; y++) {
                 depthZ[x][y] = INFINITY;
-                depthColor[x][y] = Color::White;
+                depthColor[x][y] = Color::Black;
             }
         }
         dbg::drawnTris = 0;
@@ -139,9 +141,9 @@ int main(int argc, char** argv) {
         camera.pos = obj.tris[10].verts[0];
         */
         
-        if(Keyboard::isKeyPressed(Keyboard::Up)) {
+        if(Keyboard::isKeyPressed(Keyboard::E)) {
             camera.pos.y -= 2;
-        } else if(Keyboard::isKeyPressed(Keyboard::Down)) {
+        } else if(Keyboard::isKeyPressed(Keyboard::Q)) {
             camera.pos.y += 2;
         }
         
@@ -163,6 +165,11 @@ int main(int argc, char** argv) {
 
         if(!looking) {
             window.setMouseCursorVisible(true);
+			if(Keyboard::isKeyPressed(Keyboard::Right)) camera.angle.y -= 0.01;
+			if(Keyboard::isKeyPressed(Keyboard::Left))  camera.angle.y += 0.01;
+			if(Keyboard::isKeyPressed(Keyboard::Down))  camera.angle.x += 0.01;
+			if(Keyboard::isKeyPressed(Keyboard::Up))    camera.angle.x -= 0.01;
+            camera.angle.x = clampAngle(camera.angle.x);
         } else {
 
             // mouse look
@@ -191,9 +198,6 @@ int main(int argc, char** argv) {
             for(int i = 0; i < obj.triLen; i++) {
                 renderTriangle(obj.tris[i], Color::White);
             }
-            for(int i = 0; i < obj2.triLen; i++) {
-                renderTriangle(obj2.tris[i], Color::White);
-            }
         }
 
         Image image;
@@ -205,16 +209,12 @@ int main(int argc, char** argv) {
             }
         }
 
-        window.clear();
-
+		// draw the buffer
         Texture tex;
         tex.loadFromImage(image);
-
         Sprite spr;
         spr.setTexture(tex);
         window.draw(spr);
-
-        //printf("%d\n", dbg::drawnTris);
 
         window.display();
     }
